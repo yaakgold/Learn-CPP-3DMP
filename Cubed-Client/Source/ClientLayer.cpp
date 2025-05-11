@@ -78,7 +78,7 @@ namespace Cubed
 	void ClientLayer::OnRender()
 	{
 		Walnut::Client::ConnectionStatus connectionStatus = m_Client.GetConnectionStatus();
-		if (connectionStatus == Walnut::Client::ConnectionStatus::Connected)
+		//if (connectionStatus == Walnut::Client::ConnectionStatus::Connected)
 		{
 			//play game
 			m_Renderer.RenderCube(glm::vec3(m_PlayerPosition.x, 0.5f, m_PlayerPosition.y));

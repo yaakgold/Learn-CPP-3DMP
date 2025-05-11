@@ -20,8 +20,7 @@ namespace Cubed
 		void Init();
 		void Shutdown();
 
-		void Render();
-		void RenderCube(const glm::vec3& position);
+		void RenderCube(const glm::vec3& position, const glm::vec3& rotation);
 		void RenderUI();
 	private:
 		void InitPipeline();
@@ -41,11 +40,7 @@ namespace Cubed
 			glm::mat4 Transform;
 		} m_PushConstants;
 
-		glm::vec3 m_CubePosition{ 0 };
-		glm::vec3 m_CubeRotation{ 0 };
-
-		glm::vec3 m_CameraPosition{ 0, 0, 3 };
+		glm::vec3 m_CameraPosition{ 0, 0, 8 };
 		glm::vec3 m_CameraRotation{ 0 };
-		float m_CubeScale = 0.1f;
 	};
 }
