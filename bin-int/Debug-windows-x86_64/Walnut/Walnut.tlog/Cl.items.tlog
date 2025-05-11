@@ -1,0 +1,14 @@
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Platform\GUI\Walnut\ApplicationGUI.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\ApplicationGUI.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Platform\GUI\Walnut\ImGui\ImGuiBuild.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\ImGuiBuild.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Platform\GUI\Walnut\ImGui\ImGuiTheme.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\ImGuiTheme.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Platform\GUI\Walnut\Image.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\Image.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Platform\GUI\Walnut\Input\Input.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\Input.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Platform\GUI\Walnut\UI\Console.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\Console.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Platform\GUI\Walnut\UI\UI.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\UI.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Source\Walnut\Core\Log.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\Log.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Source\Walnut\Random.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\Random.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Source\Walnut\Serialization\BufferStream.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\BufferStream.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Source\Walnut\Serialization\FileStream.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\FileStream.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Source\Walnut\Serialization\StreamReader.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\StreamReader.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Source\Walnut\Serialization\StreamWriter.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\StreamWriter.obj
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Walnut\Walnut\Source\Walnut\Utils\StringUtils.cpp;C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin-int\Debug-windows-x86_64\Walnut\StringUtils.obj
