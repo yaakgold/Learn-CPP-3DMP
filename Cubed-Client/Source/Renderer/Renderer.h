@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../Vulkan.h"
+#include "Vulkan.h"
+#include "glm/glm.hpp"
+#include "Texture.h"
 
 #include <filesystem>
 
@@ -14,14 +16,41 @@ namespace Cubed
 		VkBufferUsageFlagBits Usage = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
 	};
 
+	struct Camera
+	{
+		glm::vec3 Position{ 0, 0, 8 };
+		glm::vec3 Rotation{ 0, 0, 0 };
+	};
+
+	struct Vertex
+	{
+		glm::vec3 Position;
+		glm::vec3 Normal;
+	};
+
 	class Renderer
 	{
 	public:
 		void Init();
 		void Shutdown();
 
+		void BeginScene(const Camera& camera);
+		void EndScene(const Camera& camera);
+
 		void RenderCube(const glm::vec3& position, const glm::vec3& rotation);
 		void RenderUI();
+	public:
+		static uint32_t GetVulkanMemoryType(VkMemoryPropertyFlags properties, uint32_t type_bits)
+		{
+			VkPhysicalDevice physicalDevice = GetVulkanInfo()->PhysicalDevice;
+
+			VkPhysicalDeviceMemoryProperties prop;
+			vkGetPhysicalDeviceMemoryProperties(physicalDevice, &prop);
+			for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+				if ((prop.memoryTypes[i].propertyFlags & properties) == properties && type_bits & (1 << i))
+					return i;
+			return 0xFFFFFFFF; // Unable to find memoryType
+		}
 	private:
 		void InitPipeline();
 		void InitBuffers();
@@ -40,7 +69,6 @@ namespace Cubed
 			glm::mat4 Transform;
 		} m_PushConstants;
 
-		glm::vec3 m_CameraPosition{ 0, 0, 8 };
-		glm::vec3 m_CameraRotation{ 0 };
+		std::shared_ptr<Texture> m_Texture;
 	};
 }

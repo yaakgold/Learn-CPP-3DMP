@@ -13,7 +13,10 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.3480
   
   CubedApp.cpp
   Renderer.cpp
-C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Cubed-Client\Source\Renderer\Renderer.cpp(347,17): warning C4552: '-': result of expression not used
-C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Cubed-Client\Source\Renderer\Renderer.cpp(350,17): warning C4552: '-': result of expression not used
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Cubed-Client\Source\Renderer\Renderer.cpp(344,58): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Cubed-Client\Source\Renderer\Renderer.cpp(347,54): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Cubed-Client\Source\Renderer\Renderer.cpp(360,17): warning C4552: '-': result of expression not used
+C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\Cubed-Client\Source\Renderer\Renderer.cpp(363,17): warning C4552: '-': result of expression not used
+  Texture.cpp
   Generating Code...
   Cubed-Client.vcxproj -> C:\Users\yaako\OneDrive\Documents\dev\Learn-CPP-3DMP\bin\Debug-windows-x86_64\Cubed-Client\Cubed-Client.exe

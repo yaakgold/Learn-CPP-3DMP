@@ -158,7 +158,8 @@ IF EXIST "..\Walnut\Walnut-Modules\Walnut-Networking\vendor\GameNetworkingSocket
   <ItemGroup>
     <ClInclude Include="Source\ClientLayer.h" />
     <ClInclude Include="Source\Renderer\Renderer.h" />
-    <ClInclude Include="Source\Vulkan.h" />
+    <ClInclude Include="Source\Renderer\Texture.h" />
+    <ClInclude Include="Source\Renderer\Vulkan.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\ClientLayer.cpp">
@@ -172,7 +173,8 @@ IF EXIST "..\Walnut\Walnut-Modules\Walnut-Networking\vendor\GameNetworkingSocket
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <ClCompile Include="Source\Renderer\Renderer.cpp" />
-    <ClCompile Include="Source\Vulkan.cpp" />
+    <ClCompile Include="Source\Renderer\Texture.cpp" />
+    <ClCompile Include="Source\Renderer\Vulkan.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cubed-Common\Cubed-Common.vcxproj">

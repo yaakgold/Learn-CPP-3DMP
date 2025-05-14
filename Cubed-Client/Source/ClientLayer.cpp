@@ -6,8 +6,10 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "misc/cpp/imgui_stdlib.h"
+#include "glm/gtc/type_ptr.hpp"
 
 #include "Walnut/Serialization/BufferStream.h"
+
 #include <ServerPacket.h>
 
 namespace Cubed
@@ -39,9 +41,6 @@ namespace Cubed
 	
 	void ClientLayer::OnUpdate(float ts)
 	{
-		if (m_Client.GetConnectionStatus() != Walnut::Client::ConnectionStatus::Connected)
-			return;
-
 		glm::vec2 dir{ 0.0f, 0.0f };
 
 		if (Walnut::Input::IsKeyDown(Walnut::KeyCode::W))
@@ -66,6 +65,12 @@ namespace Cubed
 
 		m_PlayerPosition += m_PlayerVelocity * ts;
 
+		m_PlayerRotation.y += 20.0f * ts;
+
+		//Code after here is for server interaction
+		if (m_Client.GetConnectionStatus() != Walnut::Client::ConnectionStatus::Connected)
+			return;
+
 		Walnut::BufferStreamWriter stream(s_ScratchBuffer);
 
 		stream.WriteRaw(PacketType::ClientUpdate);
@@ -77,11 +82,13 @@ namespace Cubed
 	
 	void ClientLayer::OnRender()
 	{
+		m_Renderer.BeginScene(m_Camera);
+
 		Walnut::Client::ConnectionStatus connectionStatus = m_Client.GetConnectionStatus();
 		//if (connectionStatus == Walnut::Client::ConnectionStatus::Connected)
 		{
 			//play game
-			m_Renderer.RenderCube(glm::vec3(m_PlayerPosition.x, 0.5f, m_PlayerPosition.y));
+			m_Renderer.RenderCube(glm::vec3(m_PlayerPosition.x, 0.5f, m_PlayerPosition.y), m_PlayerRotation);
 
 			m_PlayerDataMutex.lock();
 			std::map<uint32_t, PlayerData> playerData = m_PlayerData;
@@ -91,9 +98,11 @@ namespace Cubed
 			{
 				if (id == m_PlayerID)
 					continue;
-				m_Renderer.RenderCube(glm::vec3(data.Position.x, 0.5f, data.Position.y));
+				m_Renderer.RenderCube(glm::vec3(data.Position.x, 0.5f, data.Position.y), { 0.0f, 0.0f, 0.0f });
 			}
 		}
+
+		m_Renderer.EndScene(m_Camera);
 	}
 
 	void ClientLayer::OnUIRender()
@@ -140,6 +149,15 @@ namespace Cubed
 
 		m_Renderer.RenderUI();
 
+		ImGui::Begin("Controls");
+
+		ImGui::DragFloat3("Player Position", glm::value_ptr(m_PlayerPosition), 0.05f);
+		ImGui::DragFloat3("Player Rotation", glm::value_ptr(m_PlayerRotation), 0.05f);
+
+		ImGui::DragFloat3("Camera Position", glm::value_ptr(m_Camera.Position), 0.05f);
+		ImGui::DragFloat3("Camera Rotation", glm::value_ptr(m_Camera.Rotation), 0.05f);
+
+		ImGui::End();
 	}
 
 	void ClientLayer::OnDataReceived(const Walnut::Buffer buffer)

@@ -29,6 +29,8 @@ namespace Cubed
 		glm::vec3 m_PlayerRotation{ 0, 45.0f, 0 };
 		glm::vec2 m_PlayerVelocity{ 0, 0 };
 
+		Camera m_Camera;
+
 		std::string m_ServerAddress;
 
 		Walnut::Client m_Client;

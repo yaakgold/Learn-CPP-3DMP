@@ -10,22 +10,26 @@
 
 namespace Cubed
 {
-	static uint32_t ImGui_ImplVulkan_MemoryType(VkMemoryPropertyFlags properties, uint32_t type_bits)
-	{
-		VkPhysicalDevice physicalDevice = GetVulkanInfo()->PhysicalDevice;
+	//static uint32_t ImGuiGetVulkanMemoryType(VkMemoryPropertyFlags properties, uint32_t type_bits)
+	//{
+	//	VkPhysicalDevice physicalDevice = GetVulkanInfo()->PhysicalDevice;
 
-		VkPhysicalDeviceMemoryProperties prop;
-		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &prop);
-		for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
-			if ((prop.memoryTypes[i].propertyFlags & properties) == properties && type_bits & (1 << i))
-				return i;
-		return 0xFFFFFFFF; // Unable to find memoryType
-	}
+	//	VkPhysicalDeviceMemoryProperties prop;
+	//	vkGetPhysicalDeviceMemoryProperties(physicalDevice, &prop);
+	//	for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+	//		if ((prop.memoryTypes[i].propertyFlags & properties) == properties && type_bits & (1 << i))
+	//			return i;
+	//	return 0xFFFFFFFF; // Unable to find memoryType
+	//}
 	
 	void Renderer::Init()
 	{
 		InitBuffers();
 		InitPipeline();
+
+		uint32_t color = 0xffff00ff;
+
+		m_Texture = std::make_shared<Texture>(1, 1, Walnut::Buffer(&color, sizeof(uint32_t)));
 	}
 
 	void Renderer::Shutdown()
@@ -33,34 +37,20 @@ namespace Cubed
 
 	}
 
-	void Renderer::RenderCube(const glm::vec3& position, const glm::vec3& rotation)
+	void Renderer::BeginScene(const Camera& camera)
 	{
-		glm::vec3 translation = position;
-
-		VkCommandBuffer commandBuffer = Walnut::Application::GetActiveCommandBuffer();
 		auto wd = Walnut::Application::GetMainWindowData();
 
 		float viewportWidth = (float)wd->Width;
 		float viewportHeight = (float)wd->Height;
 
-		// Bind the graphics pipeline.
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+		VkCommandBuffer commandBuffer = Walnut::Application::GetActiveCommandBuffer();
 
-		glm::mat4 cameraTransform = glm::translate(glm::mat4(1.0f), m_CameraPosition)
-			* glm::eulerAngleXYZ(glm::radians(m_CameraRotation.x), glm::radians(m_CameraRotation.y), glm::radians(m_CameraRotation.z));
+		glm::mat4 cameraTransform = glm::translate(glm::mat4(1.0f), camera.Position)
+			* glm::eulerAngleXYZ(glm::radians(camera.Rotation.x), glm::radians(camera.Rotation.y), glm::radians(camera.Rotation.z));
 
 		m_PushConstants.ViewProjection = glm::perspectiveFov(glm::radians(45.0f), viewportWidth, viewportHeight, 0.1f, 1000.0f)
 			* glm::inverse(cameraTransform);
-
-		m_PushConstants.Transform = glm::translate(glm::mat4(1.0f), translation)
-			* glm::eulerAngleXYZ(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z));
-
-		vkCmdPushConstants(commandBuffer, m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstants), &m_PushConstants);
-
-		VkDeviceSize offset{ 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &m_VertexBuffer.Handle, &offset);
-
-		vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer.Handle, offset, VK_INDEX_TYPE_UINT32);
 
 		VkViewport vp{
 			.y = viewportHeight,
@@ -75,25 +65,36 @@ namespace Cubed
 			.extent = {.width = (uint32_t)wd->Width, .height = (uint32_t)wd->Height} };
 		// Set scissor dynamically
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+	}
 
-		// Bind the vertex buffer to source the draw calls from.
-		/*VkDeviceSize offset = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertex_buffer, &offset);*/
+	void Renderer::EndScene(const Camera& camera)
+	{
 
+	}
+
+	void Renderer::RenderCube(const glm::vec3& position, const glm::vec3& rotation)
+	{
+		glm::vec3 translation = position;
+
+		m_PushConstants.Transform = glm::translate(glm::mat4(1.0f), translation)
+			* glm::eulerAngleXYZ(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z));
+
+		VkCommandBuffer commandBuffer = Walnut::Application::GetActiveCommandBuffer();
+
+		// Bind the graphics pipeline.
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+
+		vkCmdPushConstants(commandBuffer, m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstants), &m_PushConstants);
+
+		VkDeviceSize offset{ 0 };
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &m_VertexBuffer.Handle, &offset);
+		vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer.Handle, offset, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(commandBuffer, 36, 1, 0, 0, 0);
 	}
 
 	void Renderer::RenderUI()
 	{
-		ImGui::Begin("Controls");
-
-		//ImGui::DragFloat3("Position", glm::value_ptr(m_CubePosition), 0.05f);
-		//ImGui::DragFloat3("Rotation", glm::value_ptr(m_CubeRotation), 0.05f);
-
-		ImGui::DragFloat3("Position", glm::value_ptr(m_CameraPosition), 0.05f);
-		ImGui::DragFloat3("Rotation", glm::value_ptr(m_CameraRotation), 0.05f);
-
-		ImGui::End();
+		
 	}
 
 	VkShaderModule Renderer::LoadShaders(const std::filesystem::path& path)
@@ -156,14 +157,20 @@ namespace Cubed
 
 		std::array<VkVertexInputBindingDescription, 1> binding_desc;
 		binding_desc[0].binding = 0;
-		binding_desc[0].stride = sizeof(glm::vec3);
+		binding_desc[0].stride = sizeof(Vertex);
 		binding_desc[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-		std::array<VkVertexInputAttributeDescription, 1> attribute_desc;
+		std::array<VkVertexInputAttributeDescription, 2> attribute_desc;
+		//Position
 		attribute_desc[0].location = 0;
 		attribute_desc[0].binding = binding_desc[0].binding;
 		attribute_desc[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attribute_desc[0].offset = 0;
+		attribute_desc[0].offset = (uint32_t)offsetof(Vertex, Position);
+		//Normal
+		attribute_desc[1].location = 1;
+		attribute_desc[1].binding = binding_desc[0].binding;
+		attribute_desc[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attribute_desc[1].offset = (uint32_t)offsetof(Vertex, Normal);
 
 		// Define the pipeline vertex input.
 		VkPipelineVertexInputStateCreateInfo vertex_input{
@@ -258,40 +265,94 @@ namespace Cubed
 	{
 		VkDevice device = GetVulkanInfo()->Device;
 
-		glm::vec3 vertexData[8] = {
-			glm::vec3(-0.5f, -0.5f,  0.5f),
-			glm::vec3(-0.5f,  0.5f,  0.5f),
-			glm::vec3( 0.5f,  0.5f,  0.5f),
-			glm::vec3( 0.5f, -0.5f,  0.5f),
+		std::array<Vertex, 24> vertexData;
+		//Front
+		vertexData[0].Position	=	glm::vec3(-0.5f, -0.5f, 0.5f);
+		vertexData[0].Normal	=	glm::vec3( 0.0f,  0.0f, 1.0f);
+		vertexData[1].Position	=	glm::vec3(-0.5f,  0.5f, 0.5f);
+		vertexData[1].Normal	=	glm::vec3( 0.0f,  0.0f, 1.0f);
+		vertexData[2].Position	=	glm::vec3( 0.5f,  0.5f, 0.5f);
+		vertexData[2].Normal	=	glm::vec3( 0.0f,  0.0f, 1.0f);
+		vertexData[3].Position	=	glm::vec3( 0.5f, -0.5f, 0.5f);
+		vertexData[3].Normal	=	glm::vec3( 0.0f,  0.0f, 1.0f);
 
-			glm::vec3( 0.5f, -0.5f, -0.5f),
-			glm::vec3( 0.5f,  0.5f, -0.5f),
-			glm::vec3(-0.5f,  0.5f, -0.5f),
-			glm::vec3(-0.5f, -0.5f, -0.5f)
-		};
+		//Right
+		vertexData[4].Position	=	glm::vec3( 0.5f, -0.5f,  0.5f);
+		vertexData[4].Normal	=	glm::vec3( 1.0f,  0.0f,  0.0f);
+		vertexData[5].Position	=	glm::vec3( 0.5f,  0.5f,  0.5f);
+		vertexData[5].Normal	=	glm::vec3( 1.0f,  0.0f,  0.0f);
+		vertexData[6].Position	=	glm::vec3( 0.5f,  0.5f, -0.5f);
+		vertexData[6].Normal	=	glm::vec3( 1.0f,  0.0f,  0.0f);
+		vertexData[7].Position	=	glm::vec3( 0.5f, -0.5f, -0.5f);
+		vertexData[7].Normal	=	glm::vec3( 1.0f,  0.0f,  0.0f);
 
-		uint32_t indices[36] = { 
-			0, 1, 2, 2, 3, 0,	//Front
-			3, 2, 5, 5, 4, 3,	//Right
-			4, 5, 6, 6, 7, 4,	//Back
-			7, 6, 1, 1, 0, 7,	//Left
-			1, 6, 5, 5, 2, 1,	//Top
-			7, 0, 3, 3, 4, 7,	//Bottom
-		};
+		//Back
+		vertexData[8].Position	=	glm::vec3( 0.5f, -0.5f, -0.5f);
+		vertexData[8].Normal	=	glm::vec3( 0.0f,  0.0f, -1.0f);
+		vertexData[9].Position	=	glm::vec3( 0.5f,  0.5f, -0.5f);
+		vertexData[9].Normal	=	glm::vec3( 0.0f,  0.0f, -1.0f);
+		vertexData[10].Position =	glm::vec3(-0.5f, 0.5f, -0.5f);
+		vertexData[10].Normal	=	glm::vec3( 0.0f,  0.0f, -1.0f);
+		vertexData[11].Position =	glm::vec3(-0.5f, -0.5f, -0.5f);
+		vertexData[11].Normal	=	glm::vec3( 0.0f,  0.0f, -1.0f);
+
+		//Left
+		vertexData[12].Position =	glm::vec3(-0.5f, -0.5f, -0.5f);
+		vertexData[12].Normal	=	glm::vec3(-1.0f,  0.0f,  0.0f);
+		vertexData[13].Position =	glm::vec3(-0.5f,  0.5f, -0.5f);
+		vertexData[13].Normal	=	glm::vec3(-1.0f,  0.0f,  0.0f);
+		vertexData[14].Position =	glm::vec3(-0.5f,  0.5f,  0.5f);
+		vertexData[14].Normal	=	glm::vec3(-1.0f,  0.0f,  0.0f);
+		vertexData[15].Position =	glm::vec3(-0.5f, -0.5f,  0.5f);
+		vertexData[15].Normal	=	glm::vec3(-1.0f,  0.0f,  0.0f);
+
+		//Top
+		vertexData[16].Position =	glm::vec3(-0.5f,  0.5f,  0.5f);
+		vertexData[16].Normal	=	glm::vec3( 0.0f,  1.0f,  0.0f);
+		vertexData[17].Position =	glm::vec3(-0.5f,  0.5f, -0.5f);
+		vertexData[17].Normal	=	glm::vec3( 0.0f,  1.0f,  0.0f);
+		vertexData[18].Position =	glm::vec3( 0.5f,  0.5f, -0.5f);
+		vertexData[18].Normal	=	glm::vec3( 0.0f,  1.0f,  0.0f);
+		vertexData[19].Position =	glm::vec3( 0.5f,  0.5f,  0.5f);
+		vertexData[19].Normal	=	glm::vec3( 0.0f,  1.0f,  0.0f);
+
+		//Bottom
+		vertexData[20].Position =	glm::vec3(-0.5f, -0.5f, -0.5f);
+		vertexData[20].Normal	=	glm::vec3( 0.0f, -1.0f,  0.0f);
+		vertexData[21].Position =	glm::vec3(-0.5f, -0.5f,  0.5f);
+		vertexData[21].Normal	=	glm::vec3( 0.0f, -1.0f,  0.0f);
+		vertexData[22].Position =	glm::vec3( 0.5f, -0.5f,  0.5f);
+		vertexData[22].Normal	=	glm::vec3( 0.0f, -1.0f,  0.0f);
+		vertexData[23].Position =	glm::vec3( 0.5f, -0.5f, -0.5f);
+		vertexData[23].Normal	=	glm::vec3( 0.0f, -1.0f,  0.0f);
+
+		std::array<uint32_t, 36> indices;
+		uint32_t offset = 0;
+		for (int i = 0; i < 36; i += 6)
+		{
+			indices[i + 0] = 0 + offset;
+			indices[i + 1] = 1 + offset;
+			indices[i + 2] = 2 + offset;
+			indices[i + 3] = 2 + offset;
+			indices[i + 4] = 3 + offset;
+			indices[i + 5] = 0 + offset;
+
+			offset += 4;
+		}
 
 		m_VertexBuffer.Usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		CreateOrResizeBuffer(m_VertexBuffer, sizeof(vertexData));
+		CreateOrResizeBuffer(m_VertexBuffer, vertexData.size() * sizeof(Vertex));
 
 		m_IndexBuffer.Usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-		CreateOrResizeBuffer(m_IndexBuffer, sizeof(indices));
+		CreateOrResizeBuffer(m_IndexBuffer, indices.size() * sizeof(uint32_t));
 
 		glm::vec3* vbMemory;
-		VK_CHECK(vkMapMemory(device, m_VertexBuffer.Memory, 0, sizeof(vertexData), 0, (void**)&vbMemory));
-		memcpy(vbMemory, vertexData, sizeof(vertexData));
+		VK_CHECK(vkMapMemory(device, m_VertexBuffer.Memory, 0, vertexData.size() * sizeof(Vertex), 0, (void**)&vbMemory));
+		memcpy(vbMemory, vertexData.data(), vertexData.size() * sizeof(Vertex));
 
 		uint32_t* ibMemory;
-		VK_CHECK(vkMapMemory(device, m_IndexBuffer.Memory, 0, sizeof(indices), 0, (void**)&ibMemory));
-		memcpy(ibMemory, indices, sizeof(indices));
+		VK_CHECK(vkMapMemory(device, m_IndexBuffer.Memory, 0, indices.size() * sizeof(uint32_t), 0, (void**)&ibMemory));
+		memcpy(ibMemory, indices.data(), indices.size() * sizeof(uint32_t));
 
 		VkMappedMemoryRange range[2] = {};
 		range[0].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -327,7 +388,7 @@ namespace Cubed
 		VkMemoryAllocateInfo alloc_info = {};
 		alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		alloc_info.allocationSize = req.size;
-		alloc_info.memoryTypeIndex = ImGui_ImplVulkan_MemoryType(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, req.memoryTypeBits);
+		alloc_info.memoryTypeIndex = GetVulkanMemoryType(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, req.memoryTypeBits);
 		VK_CHECK(vkAllocateMemory(device, &alloc_info, nullptr, &buffer.Memory));
 
 		VK_CHECK(vkBindBufferMemory(device, buffer.Handle, buffer.Memory, 0));
